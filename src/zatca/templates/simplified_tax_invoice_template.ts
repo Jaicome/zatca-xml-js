@@ -11,56 +11,38 @@ import defaultBillingReference from "./invoice_billing_reference_template";
  */
 const template = /* XML */ `
 <?xml version="1.0" encoding="UTF-8"?>
-<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-         xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
-  
-  <!-- 🔐 Digital Signature Extension -->
-  <ext:UBLExtensions>
-    SET_UBL_EXTENSIONS_STRING
-  </ext:UBLExtensions>
-
-  <!-- ✅ Type Definition -->
-  <cbc:CustomizationID>urn:zatca:api:invoice:structure:simplified</cbc:CustomizationID>
-  <cbc:ProfileID>urn:zatca:api:invoice:profile:simplified</cbc:ProfileID>
-  <cbc:ID>SET_INVOICE_SERIAL_NUMBER</cbc:ID>
-  <cbc:UUID>SET_TERMINAL_UUID</cbc:UUID>
-  <cbc:IssueDate>SET_ISSUE_DATE</cbc:IssueDate>
-  <cbc:IssueTime>SET_ISSUE_TIME</cbc:IssueTime>
-  <cbc:InvoiceTypeCode>388</cbc:InvoiceTypeCode>
-  <cbc:DocumentCurrencyCode>SAR</cbc:DocumentCurrencyCode>
-  <cbc:TaxCurrencyCode>SAR</cbc:TaxCurrencyCode>
-
-  <!-- 🔁 Optional Billing Reference -->
-  SET_BILLING_REFERENCE
-
-  <!-- 📎 Additional Document References -->
-  <cac:AdditionalDocumentReference>
-    <cbc:ID>ICV</cbc:ID>
-    <cbc:UUID>SET_INVOICE_COUNTER_NUMBER</cbc:UUID>
-  </cac:AdditionalDocumentReference>
-  <cac:AdditionalDocumentReference>
-    <cbc:ID>PIH</cbc:ID>
-    <cac:Attachment>
-      <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">SET_PREVIOUS_INVOICE_HASH</cbc:EmbeddedDocumentBinaryObject>
-    </cac:Attachment>
-  </cac:AdditionalDocumentReference>
-  <cac:AdditionalDocumentReference>
-    <cbc:ID>QR</cbc:ID>
-    <cac:Attachment>
-      <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">SET_QR_CODE_DATA</cbc:EmbeddedDocumentBinaryObject>
-    </cac:Attachment>
-  </cac:AdditionalDocumentReference>
-
-  <!-- 🔏 Signature Info -->
-  <cac:Signature>
-    <cbc:ID>urn:oasis:names:specification:ubl:signature:Invoice</cbc:ID>
-    <cbc:SignatureMethod>urn:oasis:names:specification:ubl:dsig:enveloped:xades</cbc:SignatureMethod>
-  </cac:Signature>
-
-  <!-- 🧾 Supplier Info -->
-  <cac:AccountingSupplierParty>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"><ext:UBLExtensions>SET_UBL_EXTENSIONS_STRING</ext:UBLExtensions>
+    
+    <cbc:ProfileID>reporting:1.0</cbc:ProfileID>
+    <cbc:ID>SET_INVOICE_SERIAL_NUMBER</cbc:ID>
+    <cbc:UUID>SET_TERMINAL_UUID</cbc:UUID>
+    <cbc:IssueDate>SET_ISSUE_DATE</cbc:IssueDate>
+    <cbc:IssueTime>SET_ISSUE_TIME</cbc:IssueTime>
+    <cbc:InvoiceTypeCode name="0211010">SET_INVOICE_TYPE</cbc:InvoiceTypeCode>
+    <cbc:DocumentCurrencyCode>SAR</cbc:DocumentCurrencyCode>
+    <cbc:TaxCurrencyCode>SAR</cbc:TaxCurrencyCode>
+    SET_BILLING_REFERENCE
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>ICV</cbc:ID>
+        <cbc:UUID>SET_INVOICE_COUNTER_NUMBER</cbc:UUID>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>PIH</cbc:ID>
+        <cac:Attachment>
+            <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">SET_PREVIOUS_INVOICE_HASH</cbc:EmbeddedDocumentBinaryObject>
+        </cac:Attachment>
+    </cac:AdditionalDocumentReference>
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>QR</cbc:ID>
+        <cac:Attachment>
+            <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">SET_QR_CODE_DATA</cbc:EmbeddedDocumentBinaryObject>
+        </cac:Attachment>
+    </cac:AdditionalDocumentReference>
+    <cac:Signature>
+        <cbc:ID>urn:oasis:names:specification:ubl:signature:Invoice</cbc:ID>
+        <cbc:SignatureMethod>urn:oasis:names:specification:ubl:dsig:enveloped:xades</cbc:SignatureMethod>
+    </cac:Signature>
+    <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PartyIdentification>
         <cbc:ID schemeID="CRN">SET_COMMERCIAL_REGISTRATION_NUMBER</cbc:ID>
@@ -87,64 +69,8 @@ const template = /* XML */ `
       </cac:PartyLegalEntity>
     </cac:Party>
   </cac:AccountingSupplierParty>
-
-  <!-- 👤 Customer Info -->
-  <cac:AccountingCustomerParty>
-    <cac:Party>
-      <cac:PartyLegalEntity>
-        <cbc:RegistrationName>Consumer</cbc:RegistrationName>
-      </cac:PartyLegalEntity>
-    </cac:Party>
-  </cac:AccountingCustomerParty>
-
-  <!-- 💰 Tax Total -->
-  <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="SAR">SET_TAX_AMOUNT</cbc:TaxAmount>
-    <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="SAR">SET_TAXABLE_AMOUNT</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="SAR">SET_TAX_AMOUNT</cbc:TaxAmount>
-      <cac:TaxCategory>
-        <cbc:ID>S</cbc:ID>
-        <cbc:Percent>15</cbc:Percent>
-        <cac:TaxScheme>
-          <cbc:ID>VAT</cbc:ID>
-        </cac:TaxScheme>
-      </cac:TaxCategory>
-    </cac:TaxSubtotal>
-  </cac:TaxTotal>
-
-  <!-- 💵 Monetary Totals -->
-  <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="SAR">SET_LINE_EXTENSION_AMOUNT</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="SAR">SET_TAX_EXCLUSIVE_AMOUNT</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="SAR">SET_TAX_INCLUSIVE_AMOUNT</cbc:TaxInclusiveAmount>
-    <cbc:AllowanceTotalAmount currencyID="SAR">SET_ALLOWANCE_TOTAL_AMOUNT</cbc:AllowanceTotalAmount>
-    <cbc:PrepaidAmount currencyID="SAR">SET_PREPAID_AMOUNT</cbc:PrepaidAmount>
-    <cbc:PayableAmount currencyID="SAR">SET_PAYABLE_AMOUNT</cbc:PayableAmount>
-  </cac:LegalMonetaryTotal>
-
-  <!-- 🧾 Invoice Line -->
-  <cac:InvoiceLine>
-    <cbc:ID>1</cbc:ID>
-    <cbc:InvoicedQuantity unitCode="PCE">SET_INVOICED_QUANTITY</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="SAR">SET_LINE_EXTENSION_AMOUNT</cbc:LineExtensionAmount>
-    <cac:Item>
-      <cbc:Name>SET_ITEM_NAME</cbc:Name>
-      <cac:ClassifiedTaxCategory>
-        <cbc:ID>S</cbc:ID>
-        <cbc:Percent>15</cbc:Percent>
-        <cac:TaxScheme>
-          <cbc:ID>VAT</cbc:ID>
-        </cac:TaxScheme>
-      </cac:ClassifiedTaxCategory>
-    </cac:Item>
-    <cac:Price>
-      <cbc:PriceAmount currencyID="SAR">SET_PRICE_AMOUNT</cbc:PriceAmount>
-    </cac:Price>
-  </cac:InvoiceLine>
-
+  <cac:AccountingCustomerParty></cac:AccountingCustomerParty>
 </Invoice>
-
 `;
 
 // 11.2.5 Payment means type code

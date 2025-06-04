@@ -27,7 +27,8 @@
     "moment": "^2.29.4",
     "uuid": "^9.0.0",
     "xmldom": "^0.6.0",
-    "xmldsigjs": "^2.5.0"
+    "xmldsigjs": "^2.5.0",
+    "zatca-xml-js": "^0.1.9"
   },
   "repository": {
     "type": "git",
