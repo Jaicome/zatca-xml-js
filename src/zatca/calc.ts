@@ -403,7 +403,9 @@ const constructLegalMonetaryTotal = (
   acceptWarning: boolean
 ) => {
   let taxExclusiveAmount = total_line_extension_amount;
-  let taxInclusiveAmount = taxExclusiveAmount + total_tax;
+  let taxInclusiveAmount = new Decimal(taxExclusiveAmount).plus(
+    new Decimal(total_tax)
+  );
   return {
     "cbc:LineExtensionAmount": {
       "@_currencyID": "SAR",
