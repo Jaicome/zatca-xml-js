@@ -30,7 +30,7 @@ const egsunit: EGSUnitInfo = {
         city_subdivision: "32423423",
         street: "street",
         plot_identification: "4323",
-        building: "32423423",
+        building: "3242",
         postal_zone: "11417"
     },
     branch_name: "My Branch Name",
