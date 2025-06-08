@@ -69,7 +69,13 @@ const template = /* XML */ `
       </cac:PartyLegalEntity>
     </cac:Party>
   </cac:AccountingSupplierParty>
-  <cac:AccountingCustomerParty></cac:AccountingCustomerParty>
+  <cac:AccountingCustomerParty>
+  <cac:Party>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>SET_BUYER_NAME</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
 </Invoice>
 `;
 
@@ -122,6 +128,7 @@ export interface ZATCASimplifiedInvoiceProps {
   previous_invoice_hash: string;
   line_items?: ZATCASimplifiedInvoiceLineItem[];
   cancelation?: ZATCASimplifiedInvoicCancelation;
+  buyer_name?: string;
 }
 
 export default function populate(props: ZATCASimplifiedInvoiceProps): string {
@@ -198,6 +205,11 @@ export default function populate(props: ZATCASimplifiedInvoiceProps): string {
   populated_template = populated_template.replace(
     "SET_POSTAL_NUMBER",
     props.egs_info.location.postal_zone
+  );
+
+  populated_template = populated_template.replace(
+    "SET_BUYER_NAME",
+    props.egs_info.buyer_name
   );
 
   populated_template = populated_template.replace(
