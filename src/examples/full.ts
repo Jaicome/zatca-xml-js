@@ -1,7 +1,7 @@
+import fs from "fs";
 import { EGS, EGSUnitInfo } from "../zatca/egs";
 import { ZATCASimplifiedInvoiceLineItem } from "../zatca/templates/simplified_tax_invoice_template";
 import { ZATCASimplifiedTaxInvoice } from "../zatca/ZATCASimplifiedTaxInvoice";
-import { generatePhaseOneQR } from "../zatca/qr";
 
 const currentDate = new Date().toISOString();
 
@@ -12,7 +12,7 @@ const line_item: ZATCASimplifiedInvoiceLineItem = {
   quantity: 5,
   tax_exclusive_price: 10,
   VAT_percent: 0.15,
-  other_taxes: [], // emptied other taxes to comply with Zatca BR-KSA-84
+  other_taxes: [],
   discounts: [
     { amount: 2, reason: "A discount" },
     { amount: 2, reason: "A second discount" },
@@ -40,7 +40,7 @@ const egsunit: EGSUnitInfo = {
   branch_industry: "Food",
 };
 
-// Sample Invoice
+// Create Invoice Object
 const invoice = new ZATCASimplifiedTaxInvoice({
   props: {
     egs_info: egsunit,
@@ -53,25 +53,23 @@ const invoice = new ZATCASimplifiedTaxInvoice({
   },
 });
 
+// Export the **raw (unsigned) XML** for your review
+const invoiceXMLString = invoice.toString();
+fs.writeFileSync("test_invoice.xml", invoiceXMLString, "utf8");
+console.log("✅ Invoice XML (unsigned) saved as test_invoice.xml");
+
 const main = async () => {
   try {
     console.log("Starting ZATCA e-invoice process...");
 
-    // TEMP_FOLDER: Use .env or set directly here (Default: /tmp/)
-    // Enable for windows
-    // process.env.TEMP_FOLDER = `${require("os").tmpdir()}\\`;
-
-    console.log("1. Initializing EGS unit...");
-    // Init a new EGS
+    // 1. Initialize EGS unit
     const egs = new EGS(egsunit);
 
-    console.log("2. Generating new keys and CSR...");
-    // New Keys & CSR for the EGS
+    // 2. Generate Keys & CSR
     await egs.generateNewKeysAndCSR(false, "solution_name");
     console.log("Keys and CSR generated successfully");
 
-    console.log("3. Issuing compliance certificate...");
-    // Issue a new compliance cert for the EGS
+    // 3. Issue compliance certificate
     const compliance_request_id = await egs.issueComplianceCertificate(
       "123345"
     );
@@ -80,15 +78,14 @@ const main = async () => {
       compliance_request_id
     );
 
-    console.log("4. Signing invoice...");
-    // Sign invoice
+    // 4. Sign invoice and get the signed XML
     const { signed_invoice_string, invoice_hash, qr } =
       egs.signInvoice(invoice);
-    console.log("Invoice signed successfully");
+    fs.writeFileSync("test_invoice_signed.xml", signed_invoice_string, "utf8");
+    console.log("✅ Signed Invoice XML saved as test_invoice_signed.xml");
     console.log("Invoice hash:", invoice_hash);
 
-    console.log("5. Checking invoice compliance...");
-    // Check invoice compliance
+    // 5. Check invoice compliance
     const complianceResult = await egs.checkInvoiceCompliance(
       signed_invoice_string,
       invoice_hash
@@ -106,8 +103,7 @@ const main = async () => {
       );
     }
 
-    console.log("6. Issuing production certificate...");
-    // Issue production certificate
+    // 6. Issue production certificate
     const production_request_id = await egs.issueProductionCertificate(
       compliance_request_id
     );
@@ -116,8 +112,7 @@ const main = async () => {
       production_request_id
     );
 
-    console.log("7. Reporting invoice...");
-    // Report invoice production
+    // 7. Report invoice
     let reportedInvoice = await egs.reportInvoice(
       signed_invoice_string,
       invoice_hash

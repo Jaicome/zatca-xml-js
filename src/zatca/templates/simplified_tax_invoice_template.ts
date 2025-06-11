@@ -12,7 +12,7 @@ import defaultBillingReference from "./invoice_billing_reference_template";
 const template = /* XML */ `
 <?xml version="1.0" encoding="UTF-8"?>
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"><ext:UBLExtensions>SET_UBL_EXTENSIONS_STRING</ext:UBLExtensions>
-    
+
     <cbc:ProfileID>reporting:1.0</cbc:ProfileID>
     <cbc:ID>SET_INVOICE_SERIAL_NUMBER</cbc:ID>
     <cbc:UUID>SET_TERMINAL_UUID</cbc:UUID>

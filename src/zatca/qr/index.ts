@@ -44,26 +44,32 @@ export const generateQR = ({
   const issue_date = invoice_xml.get("Invoice/cbc:IssueDate")?.[0];
   const issue_time = invoice_xml.get("Invoice/cbc:IssueTime")?.[0];
 
-  // Detect if simplified invoice or not (not used currently assuming all simplified tax invoice)
-  const invoice_type = invoice_xml
-    .get("Invoice/cbc:InvoiceTypeCode")?.[0]
-    ["@_name"].toString();
-
+  // Format datetime according to ZATCA specifications (YYYY-MM-DDThh:mm:ssZ)
   const formatted_datetime = `${issue_date}T${issue_time}`;
 
-  const qr_tlv = TLV([
-    seller_name,
-    VAT_number,
-    formatted_datetime,
-    invoice_total,
-    VAT_total,
-    invoice_hash,
-    Buffer.from(digital_signature),
-    public_key,
-    certificate_signature,
-  ]);
+  // Create TLV structure according to ZATCA specifications
+  const tlv_data = [
+    { tag: 1, value: seller_name }, // Seller Name
+    { tag: 2, value: VAT_number }, // VAT Number
+    { tag: 3, value: formatted_datetime }, // Timestamp
+    { tag: 4, value: invoice_total }, // Invoice Total
+    { tag: 5, value: VAT_total }, // VAT Total
+    { tag: 6, value: invoice_hash }, // Invoice Hash
+    { tag: 7, value: Buffer.from(digital_signature) }, // Digital Signature
+    { tag: 8, value: public_key }, // Public Key
+    { tag: 9, value: certificate_signature }, // Certificate Signature
+  ];
 
-  return qr_tlv.toString("base64");
+  // Generate TLV buffer
+  const tlv_parts: Uint8Array[] = tlv_data.map(({ tag, value }) => {
+    const value_buffer = Buffer.from(value);
+    const length_buffer = new Uint8Array([value_buffer.length]);
+    const tag_buffer = new Uint8Array([tag]);
+    return new Uint8Array([...tag_buffer, ...length_buffer, ...value_buffer]);
+  });
+
+  const tlv_buffer = Buffer.concat(tlv_parts);
+  return tlv_buffer.toString("base64");
 };
 
 /**
@@ -96,29 +102,26 @@ export const generatePhaseOneQR = ({
   const issue_date = invoice_xml.get("Invoice/cbc:IssueDate")?.[0];
   const issue_time = invoice_xml.get("Invoice/cbc:IssueTime")?.[0];
 
+  // Format datetime according to ZATCA specifications (YYYY-MM-DDThh:mm:ssZ)
   const formatted_datetime = `${issue_date}T${issue_time}`;
 
-  const qr_tlv = TLV([
-    seller_name,
-    VAT_number,
-    formatted_datetime,
-    invoice_total,
-    VAT_total,
-  ]);
+  // Create TLV structure for phase one
+  const tlv_data = [
+    { tag: 1, value: seller_name }, // Seller Name
+    { tag: 2, value: VAT_number }, // VAT Number
+    { tag: 3, value: formatted_datetime }, // Timestamp
+    { tag: 4, value: invoice_total }, // Invoice Total
+    { tag: 5, value: VAT_total }, // VAT Total
+  ];
 
-  return qr_tlv.toString("base64");
-};
-
-const TLV = (tags: any[]): Buffer => {
-  const tlv_tags: Buffer[] = [];
-  tags.forEach((tag, i) => {
-    const tagValueBuffer: Buffer = Buffer.from(tag);
-    const current_tlv_value: Buffer = Buffer.from([
-      i + 1,
-      tagValueBuffer.byteLength,
-      ...tagValueBuffer,
-    ]);
-    tlv_tags.push(current_tlv_value);
+  // Generate TLV buffer
+  const tlv_parts: Uint8Array[] = tlv_data.map(({ tag, value }) => {
+    const value_buffer = Buffer.from(value);
+    const length_buffer = new Uint8Array([value_buffer.length]);
+    const tag_buffer = new Uint8Array([tag]);
+    return new Uint8Array([...tag_buffer, ...length_buffer, ...value_buffer]);
   });
-  return Buffer.concat(tlv_tags);
+
+  const tlv_buffer = Buffer.concat(tlv_parts);
+  return tlv_buffer.toString("base64");
 };

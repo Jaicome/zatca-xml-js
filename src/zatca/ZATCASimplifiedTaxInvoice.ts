@@ -101,7 +101,7 @@ export class ZATCASimplifiedTaxInvoice {
       });
     });
 
-    // Calc item subtotal
+    // Calc item subtotal (I think it is same (BT-131))
     let line_item_subtotal =
       line_item.tax_exclusive_price * line_item.quantity -
       line_item_total_discounts;

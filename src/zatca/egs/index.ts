@@ -8,6 +8,7 @@
 import { spawn } from "child_process";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
+import EC from "elliptic";
 
 import defaultCSRConfig from "../templates/csr_template";
 import API from "../api";
@@ -45,29 +46,44 @@ export interface EGSUnitInfo {
 const OpenSSL = (cmd: string[]): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     try {
+      console.log("Running OpenSSL command:", cmd.join(" "));
       const command = spawn("openssl", cmd);
       let result = "";
+      let error = "";
+
       command.stdout.on("data", (data) => {
         result += data.toString();
       });
+
+      command.stderr.on("data", (data) => {
+        error += data.toString();
+      });
+
       command.on("close", (code: number) => {
+        if (code !== 0) {
+          console.error("OpenSSL error:", error);
+          return reject(
+            new Error(`OpenSSL command failed with code ${code}: ${error}`)
+          );
+        }
         return resolve(result);
       });
+
       command.on("error", (error: any) => {
+        console.error("OpenSSL spawn error:", error);
         return reject(error);
       });
     } catch (error: any) {
+      console.error("OpenSSL try-catch error:", error);
       reject(error);
     }
   });
 };
 
-// Generate a secp256k1 key pair
-// https://techdocs.akamai.com/iot-token-access-control/docs/generate-ecdsa-keys
-// openssl ecparam -name secp256k1 -genkey -noout -out ec-secp256k1-priv-key.pem
-const generateSecp256k1KeyPair = async (): Promise<string> => {
+// Generate a secp256r1 (NIST P-256) key pair
+const generateSecp256r1KeyPair = async (): Promise<string> => {
   try {
-    const result = await OpenSSL(["ecparam", "-name", "secp256k1", "-genkey"]);
+    const result = await OpenSSL(["ecparam", "-name", "prime256v1", "-genkey"]);
     if (!result.includes("-----BEGIN EC PRIVATE KEY-----"))
       throw new Error("Error no private key found in OpenSSL output.");
 
@@ -98,6 +114,7 @@ const generateCSR = async (
   const csr_config_file = `${
     process.env.TEMP_FOLDER ?? "/tmp/"
   }${uuidv4()}.cnf`;
+
   fs.writeFileSync(private_key_file, egs_info.private_key);
   fs.writeFileSync(
     csr_config_file,
@@ -130,12 +147,14 @@ const generateCSR = async (
       "-config",
       csr_config_file,
     ]);
+
     if (!result.includes("-----BEGIN CERTIFICATE REQUEST-----"))
       throw new Error("Error no CSR found in OpenSSL output.");
 
     let csr: string = `-----BEGIN CERTIFICATE REQUEST-----${
       result.split("-----BEGIN CERTIFICATE REQUEST-----")[1]
     }`.trim();
+
     cleanUp();
     return csr;
   } catch (error) {
@@ -169,7 +188,7 @@ export class EGS {
   }
 
   /**
-   * Generates a new secp256k1 Public/Private key pair for the EGS.
+   * Generates a new secp256r1 (NIST P-256) Public/Private key pair for the EGS.
    * Also generates and signs a new CSR.
    * `Note`: This functions uses OpenSSL thus requires it to be installed on whatever system the package is running in.
    * @param production Boolean CSR or Compliance CSR
@@ -181,7 +200,7 @@ export class EGS {
     solution_name: string
   ): Promise<any> {
     try {
-      const new_private_key = await generateSecp256k1KeyPair();
+      const new_private_key = await generateSecp256r1KeyPair();
       this.egs_info.private_key = new_private_key;
 
       const new_csr = await generateCSR(
