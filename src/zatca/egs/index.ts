@@ -1,7 +1,7 @@
 /**
  * This module requires OpenSSL to be installed on the system. 
- * Using an OpenSSL In order to generate secp256k1 key pairs, a CSR and sign it.
- * I was unable to find a working library that supports the named curve `secp256k1` and do not want to implement my own JS based crypto.
+ * Using OpenSSL to generate prime256v1 (secp256r1) key pairs, a CSR and sign it.
+ * This curve is required for ZATCA compliance.
  * Any crypto expert contributions to move away from OpenSSL to JS will be appreciated.
  */
 
@@ -75,12 +75,12 @@ const OpenSSL = (cmd: string[]): Promise<string> => {
     });
 }
 
-// Generate a secp256k1 key pair
+// Generate a prime256v1 (secp256r1) key pair for ZATCA compliance
 // https://techdocs.akamai.com/iot-token-access-control/docs/generate-ecdsa-keys
-// openssl ecparam -name secp256k1 -genkey -noout -out ec-secp256k1-priv-key.pem
-const generateSecp256k1KeyPair = async (): Promise<string> => {
+// openssl ecparam -name prime256v1 -genkey -noout -out ec-prime256v1-priv-key.pem
+const generatePrime256v1KeyPair = async (): Promise<string> => {
     try {
-        const result = await OpenSSL(["ecparam", "-name", "secp256k1", "-genkey"]);
+        const result = await OpenSSL(["ecparam", "-name", "prime256v1", "-genkey"]);
         if (!result.includes("-----BEGIN EC PRIVATE KEY-----")) throw new Error("Error no private key found in OpenSSL output.");
 
         let private_key: string = `-----BEGIN EC PRIVATE KEY-----${result.split("-----BEGIN EC PRIVATE KEY-----")[1]}`.trim();
@@ -162,7 +162,7 @@ export class EGS {
     }
 
     /**
-     * Generates a new secp256k1 Public/Private key pair for the EGS.
+     * Generates a new prime256v1 (secp256r1) Public/Private key pair for the EGS.
      * Also generates and signs a new CSR.
      * `Note`: This functions uses OpenSSL thus requires it to be installed on whatever system the package is running in.
      * @param production Boolean CSR or Compliance CSR
@@ -171,7 +171,7 @@ export class EGS {
      */
     async generateNewKeysAndCSR(production: boolean, solution_name: string): Promise<any> {
         try {
-            const new_private_key = await generateSecp256k1KeyPair();
+            const new_private_key = await generatePrime256v1KeyPair();
             this.egs_info.private_key = new_private_key;
 
             const new_csr = await generateCSR(this.egs_info, production, solution_name);    
