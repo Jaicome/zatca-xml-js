@@ -1,5 +1,5 @@
 {
-  "name": "zatca-xml-ts",
+  "name": "@jaicome/zatca-xml-ts",
   "version": "0.1.5",
   "description": "An implementation of Saudi Arabia ZATCA's E-Invoicing requirements, processes, and standards.",
   "main": "lib/index.js",
@@ -10,14 +10,17 @@
     "build": "tsc --project tsconfig.build.json",
     "example": "tsc --project tsconfig.build.json && node lib/examples/full.js",
     "prepare": "npm run build",
-    "lint": "npx prettier@2.8.8 --write ."
+    "lint": "npx prettier@2.8.8 --write .",
+    "build:dts": "tsdown --dts src/index.ts src/schema/index.ts",
+    "release": "pnpm publish"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.7.16",
     "@types/uuid": "^8.3.4",
     "@types/xmldom": "^0.1.31",
-    "typescript": "^4.8.3"
+    "typescript": "^4.8.3",
+    "tsdown": "latest"
   },
   "dependencies": {
     "@fidm/x509": "^1.2.1",
@@ -34,7 +37,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Repzo/zatca-xml-js"
+    "url": "https://github.com/Jaicome/zatca-xml-js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "typings": "lib/index.d.ts",
   "keywords": [
