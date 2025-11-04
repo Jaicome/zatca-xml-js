@@ -108,3 +108,4 @@ dist
 /testing_lib
 /src/tests
 .DS_STORE
+package-lock.json

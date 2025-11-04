@@ -1,6 +1,6 @@
 {
-  "name": "zatca-xml-js",
-  "version": "0.1.9",
+  "name": "zatca-xml-ts",
+  "version": "0.1.5",
   "description": "An implementation of Saudi Arabia ZATCA's E-Invoicing requirements, processes, and standards.",
   "main": "lib/index.js",
   "files": [
@@ -8,9 +8,9 @@
   ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
-    "test": "tsc && node testing_lib/tests/test.js",
     "example": "tsc --project tsconfig.build.json && node lib/examples/full.js",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "lint": "npx prettier@2.8.8 --write ."
   },
   "devDependencies": {
     "@types/lodash": "^4.14.184",
@@ -21,17 +21,20 @@
   },
   "dependencies": {
     "@fidm/x509": "^1.2.1",
+    "@types/mustache": "^4.2.5",
     "axios": "^0.27.2",
+    "decimal.js": "^10.4.3",
     "fast-xml-parser": "^4.0.9",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
+    "mustache": "^4.2.0",
     "uuid": "^9.0.0",
     "xmldom": "^0.6.0",
     "xmldsigjs": "^2.5.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wes4m/zatca-xml-js"
+    "url": "https://github.com/Repzo/zatca-xml-js"
   },
   "typings": "lib/index.d.ts",
   "keywords": [
@@ -48,6 +51,6 @@
     "phase 1",
     "phase 2"
   ],
-  "author": "Wesam Alzahir (https://wes4m.io/)",
+  "author": "Mohammad Alnatour",
   "license": "MIT"
 }

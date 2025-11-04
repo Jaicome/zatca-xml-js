@@ -68,17 +68,14 @@ export const getCertificateHash = (certificate_string: string): string => {
  * https://zatca.gov.sa/ar/E-Invoicing/SystemsDevelopers/Documents/20220624_ZATCA_Electronic_Invoice_Security_Features_Implementation_Standards.pdf
  * 1.4: Digital signature, part of the cryptographic stamp (invoice hash signed using private key) (BS: KSA-15).
  * @param invoice_hash String base64 encoded invoice hash.
- * @param private_key_string String base64 encoded ec-secp256k1 private key body.
+ * @param private_key_string String base64 encoded EC prime256v1 private key body.
  * @returns String base64 encoded digital signature.
  */
 export const createInvoiceDigitalSignature = (invoice_hash: string, private_key_string: string): string => {
     const invoice_hash_bytes = Buffer.from(invoice_hash, "base64");
-    const cleanedup_private_key_string: string = cleanUpPrivateKeyString(private_key_string);
-    const wrapped_private_key_string: string = `-----BEGIN EC PRIVATE KEY-----\n${cleanedup_private_key_string}\n-----END EC PRIVATE KEY-----`;
-
     var sign = createSign('sha256');
     sign.update(invoice_hash_bytes);
-    var signature = Buffer.from(sign.sign(wrapped_private_key_string)).toString("base64");
+    var signature = Buffer.from(sign.sign(private_key_string)).toString("base64");
     return signature;
 }
 
@@ -123,7 +120,7 @@ export const cleanUpCertificateString = (certificate_string: string): string => 
 
 /**
  * Removes header and footer from private key string.
- * @param privatek_key_string ec-secp256k1 private key string.
+ * @param private_key_string EC prime256v1 private key string.
  * @returns String base64 encoded private key body.
  */
  export const cleanUpPrivateKeyString = (certificate_string: string): string => {
@@ -140,7 +137,7 @@ interface generateSignatureXMLParams {
  * Main signing function.
  * @param invoice_xml XMLDocument of invoice to be signed.
  * @param certificate_string String signed EC certificate.
- * @param private_key_string String ec-secp256k1 private key;
+ * @param private_key_string String EC prime256v1 private key;
  * @returns signed_invoice_string: string, invoice_hash: string, qr: string
  */
 export const generateSignedXMLString = ({invoice_xml, certificate_string, private_key_string}: generateSignatureXMLParams):
